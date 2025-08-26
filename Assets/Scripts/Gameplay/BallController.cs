@@ -18,11 +18,23 @@ public class BallController : MonoBehaviour
 
     private void Awake() => rb = GetComponent<Rigidbody2D>();
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!IsLaunched && followTarget)
         {
-            transform.position = (Vector2)followTarget.position + localOffset;
+            Vector2 target = (Vector2)followTarget.position + localOffset;
+            rb.MovePosition(target);
+        }
+
+        if (IsLaunched)
+        {
+            float speed = rb.linearVelocity.magnitude;
+            if (speed < minSpeed && speed > 0f)
+                rb.linearVelocity = rb.linearVelocity.normalized * minSpeed;
+            else if (speed > maxSpeed)
+                rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+
+            Debug.Log(speed);
         }
     }
 

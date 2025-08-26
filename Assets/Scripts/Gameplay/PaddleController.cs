@@ -15,13 +15,16 @@ public class PaddleController : MonoBehaviour
 
     InputAction moveAction;
     InputAction launchAction;
+    Rigidbody2D rb;
 
     BallController currentBall;
 
-
+    float inputX;
 
     private void Awake()
     {
+        rb = GetComponent<Rigidbody2D>();
+
         moveAction = InputSystem.actions?.FindAction("Move");
         launchAction = InputSystem.actions?.FindAction("Attack");
 
@@ -51,12 +54,7 @@ public class PaddleController : MonoBehaviour
 
     private void Update()
     {
-        float inputX = moveAction.ReadValue<Vector2>().x;
-
-        // Move paddle
-        var p = transform.position;
-        p.x = Mathf.Clamp(p.x + inputX * moveSpeed * Time.deltaTime, -clampX, clampX);
-        transform.position = p;
+        inputX = moveAction.ReadValue<Vector2>().x;
 
         // Launch ball
         if (launchAction.WasPerformedThisFrame())
@@ -66,6 +64,22 @@ public class PaddleController : MonoBehaviour
                 currentBall.Launch(Vector2.up);
             }
         }
+
+
+        // --- Dev cheat: Respawn ball with R key ---
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            SpawnBallAttached();
+            Debug.Log("[DEV] Ball respawned with R key");
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        // Move paddle
+        float targetX = Mathf.Clamp(rb.position.x + inputX * moveSpeed * Time.fixedDeltaTime, -clampX, clampX);
+        Vector2 nextPos = new Vector2(targetX, rb.position.y);
+        rb.MovePosition(nextPos);
     }
 
     public BallController SpawnBallAttached()
