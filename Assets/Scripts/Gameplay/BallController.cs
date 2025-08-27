@@ -5,8 +5,8 @@ using UnityEngine;
 public class BallController : MonoBehaviour
 {
     [Header("Speed")]
-    public float launchSpeed = 8f;
-    public float minSpeed = 6f, maxSpeed = 12f;
+    public float launchSpeed = 500f;
+    // public float minSpeed = 40f, maxSpeed = 60f;
 
     [Header("Attach Follow")]
     public Transform followTarget;
@@ -29,10 +29,10 @@ public class BallController : MonoBehaviour
         if (IsLaunched)
         {
             float speed = rb.linearVelocity.magnitude;
-            if (speed < minSpeed && speed > 0f)
-                rb.linearVelocity = rb.linearVelocity.normalized * minSpeed;
-            else if (speed > maxSpeed)
-                rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+            //if (speed < minSpeed && speed > 0f)
+            //    rb.linearVelocity = rb.linearVelocity.normalized * minSpeed;
+            //else if (speed > maxSpeed)
+            //    rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
 
             Debug.Log(speed);
         }
@@ -49,14 +49,19 @@ public class BallController : MonoBehaviour
         rb.angularVelocity = 0f;
     }
 
-    public void Launch(Vector2 dir)
+    public void Launch()
     {
         if (IsLaunched) return;
         IsLaunched = true;
         followTarget = null;
 
         rb.bodyType = RigidbodyType2D.Dynamic;
-        rb.linearVelocity = dir.normalized * launchSpeed;
+
+        Vector2 force = Vector2.zero;
+        force.x = Random.Range(-1f, 1f);
+        force.y = 1f;
+
+        rb.AddForce(force.normalized * this.launchSpeed);
     }
 
 }

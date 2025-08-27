@@ -12,6 +12,7 @@ public class PaddleController : MonoBehaviour
     public BallController ballPrefab;
     public Transform ballSocket;
     public Vector2 ballAttachOffset = new Vector2(0f, 1f);
+    float maxBounceAngle = 75f;
 
     InputAction moveAction;
     InputAction launchAction;
@@ -20,6 +21,7 @@ public class PaddleController : MonoBehaviour
     BallController currentBall;
 
     float inputX;
+
 
     private void Awake()
     {
@@ -61,7 +63,7 @@ public class PaddleController : MonoBehaviour
         {
             if (currentBall && !currentBall.IsLaunched)
             {
-                currentBall.Launch(Vector2.up);
+                currentBall.Launch();
             }
         }
 
@@ -96,5 +98,25 @@ public class PaddleController : MonoBehaviour
         currentBall = Instantiate(ballPrefab, socket.position, Quaternion.identity);
         currentBall.AttachTo(socket, ballAttachOffset);
         return currentBall;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        BallController ball = collision.gameObject.GetComponent<BallController>();
+
+        if (ball != null)
+        {
+            Vector3 paddlePosition = this.transform.position;
+            Vector2 contactPoint = collision.GetContact(0).point;
+
+            float offset = paddlePosition.x - contactPoint.x;
+            float width = collision.otherCollider.bounds.size.x / 2;
+
+            float currentAngle = Vector2.SignedAngle(Vector2.up, ball.GetComponent<Rigidbody2D>().linearVelocity);
+            float bounceAngle = (offset / width) * this.maxBounceAngle;
+            float newAngle = Mathf.Clamp(currentAngle + bounceAngle, -this.maxBounceAngle, this.maxBounceAngle);
+
+            Debug.Log($"Current Angle: {currentAngle} New Angle: {newAngle}");
+        }
     }
 }
